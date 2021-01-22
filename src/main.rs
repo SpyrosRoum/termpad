@@ -80,7 +80,7 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut file = settings.output.clone();
     let name = loop {
         let name = utils::gen_name();
-        file.push(&name);
+        file.push(name.to_lowercase());
         if !file.is_file() {
             break name;
         }
@@ -110,7 +110,7 @@ fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {
     let read = stream.read(&mut buffer).unwrap();
 
     // We do `read - 1` to account for the `\n`
-    let file_name = String::from_utf8_lossy(&buffer[..read - 1]).to_string();
+    let file_name = String::from_utf8_lossy(&buffer[..read - 1]).to_lowercase();
 
     let file_path = settings.output.join(&file_name);
     if file_path.is_file() {

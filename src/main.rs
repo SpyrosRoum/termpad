@@ -91,7 +91,7 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     file.write_all(&buffer[..read]).unwrap();
 
     let url = utils::gen_url(&settings.domain, &name, settings.https);
-    stream.write_all(url.as_ref()).unwrap();
+    stream.write_all(url.as_bytes()).unwrap();
 }
 
 fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {

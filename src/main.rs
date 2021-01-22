@@ -85,11 +85,13 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
         if !file.is_file() {
             break name;
         }
+        // Since the file exists we remove the last part so we can get a new one on the next iteration
         file.pop();
     };
     let mut file = File::create(file).unwrap();
     file.write_all(&buffer[..read]).unwrap();
 
+    // The name is usually printed on the other side so we just add a newline here
     name.push('\n');
     stream.write_all(name.as_bytes()).unwrap();
 }

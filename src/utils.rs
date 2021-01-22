@@ -17,8 +17,9 @@ pub fn dir_is_writable(path: &Path) -> Result<bool> {
 pub fn gen_name() -> String {
     let mut rng = thread_rng();
 
-    let adj = ADJECTIVES.choose(&mut rng).unwrap();
+    let adj1 = ADJECTIVES.choose(&mut rng).unwrap();
+    let adj2 = ADJECTIVES.choose(&mut rng).unwrap();
     let noun = NOUNS.choose(&mut rng).unwrap();
 
-    format!("{}{}", adj, noun)
+    format!("{}{}{}", adj1, adj2, noun)
 }

@@ -79,7 +79,7 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let read = stream.read(&mut buffer).unwrap();
 
     let mut file = settings.output.clone();
-    let name = loop {
+    let mut name = loop {
         let name = utils::gen_name();
         file.push(name.to_lowercase());
         if !file.is_file() {
@@ -90,8 +90,8 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut file = File::create(file).unwrap();
     file.write_all(&buffer[..read]).unwrap();
 
-    let url = utils::gen_url(&settings.domain, &name, settings.https);
-    stream.write_all(url.as_bytes()).unwrap();
+    name.push('\n');
+    stream.write_all(name.as_bytes()).unwrap();
 }
 
 fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {

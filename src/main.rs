@@ -43,7 +43,6 @@ fn main() -> Result<()> {
         })
     };
 
-
     let output_thread = {
         let listener = TcpListener::bind(("0.0.0.0", 8888))?;
         let opt = Arc::clone(&opt);
@@ -59,12 +58,12 @@ fn main() -> Result<()> {
         })
     };
 
-    input_thread.join();
-    output_thread.join();
+    input_thread.join().unwrap();
+    output_thread.join().unwrap();
     Ok(())
 }
 
-fn handle_client(mut stream: TcpStream, settings: Arc<Opt>, input: bool) {
+fn handle_client(stream: TcpStream, settings: Arc<Opt>, input: bool) {
     if input {
         handle_client_input(stream, settings);
     } else {
@@ -116,7 +115,7 @@ fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {
     if file_path.is_file() {
         let mut file = File::open(file_path).unwrap();
         let mut content = String::new();
-        file.read_to_string(&mut content);
-        stream.write_all(content.as_bytes());
+        file.read_to_string(&mut content).unwrap();
+        stream.write_all(content.as_bytes()).unwrap();
     }
 }

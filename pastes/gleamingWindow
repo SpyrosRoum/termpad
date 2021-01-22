@@ -65,10 +65,7 @@ fn handle_client(mut stream: TcpStream, settings: Arc<Opt>) {
         String::from("http://")
     };
     addr.push_str(&settings.domain);
-    if !settings.domain.ends_with('/') {
-        addr.push('/');
-    }
-    addr.push_str(name.as_str());
+    // addr.push_str(&name);
     addr.push('\n');
 
     stream.write_all(addr.as_ref()).unwrap();

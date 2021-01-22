@@ -46,30 +46,3 @@ fn handle_client(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut buffer = vec![0; settings.buffer_size];
 
     let read = stream.read(&mut buffer).unwrap();
-
-    let mut file = settings.output.clone();
-    let name = loop {
-        let name = utils::gen_name();
-        file.push(&name);
-        if !file.is_file() {
-            break name;
-        }
-        file.pop();
-    };
-    let mut file = File::create(file).unwrap();
-    file.write_all(&buffer[..read]).unwrap();
-
-    let mut addr = if settings.https {
-        String::from("https://")
-    } else {
-        String::from("http://")
-    };
-    addr.push_str(&settings.domain);
-    if !settings.domain.ends_with('/') {
-        addr.push('/');
-    }
-    addr.push_str(name.as_str());
-    addr.push('\n');
-
-    stream.write_all(addr.as_ref()).unwrap();
-}

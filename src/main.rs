@@ -28,21 +28,51 @@ fn main() -> Result<()> {
         _ => {}
     }
 
-    let listener = TcpListener::bind(("0.0.0.0", 9999))?;
-
-    for stream in listener.incoming() {
-        if stream.is_err() {
-            continue;
-        }
-        let stream = stream.unwrap();
+    let input_thread = {
+        let listener = TcpListener::bind(("0.0.0.0", 9999))?;
         let opt = Arc::clone(&opt);
-        thread::spawn(move || handle_client(stream, opt));
-    }
+        thread::spawn(move || {
+            for stream in listener.incoming() {
+                if stream.is_err() {
+                    continue;
+                }
+                let stream = stream.unwrap();
+                let opt = Arc::clone(&opt);
+                thread::spawn(move || handle_client(stream, opt, true));
+            }
+        })
+    };
 
+
+    let output_thread = {
+        let listener = TcpListener::bind(("0.0.0.0", 8888))?;
+        let opt = Arc::clone(&opt);
+        thread::spawn(move || {
+            for stream in listener.incoming() {
+                if stream.is_err() {
+                    continue;
+                }
+                let stream = stream.unwrap();
+                let opt = Arc::clone(&opt);
+                thread::spawn(move || handle_client(stream, opt, false));
+            }
+        })
+    };
+
+    input_thread.join();
+    output_thread.join();
     Ok(())
 }
 
-fn handle_client(mut stream: TcpStream, settings: Arc<Opt>) {
+fn handle_client(mut stream: TcpStream, settings: Arc<Opt>, input: bool) {
+    if input {
+        handle_client_input(stream, settings);
+    } else {
+        handle_client_output(stream, settings);
+    }
+}
+
+fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut buffer = vec![0; settings.buffer_size];
 
     let read = stream.read(&mut buffer).unwrap();
@@ -72,4 +102,21 @@ fn handle_client(mut stream: TcpStream, settings: Arc<Opt>) {
     addr.push('\n');
 
     stream.write_all(addr.as_ref()).unwrap();
+}
+
+fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {
+    let mut buffer = [0; 50];
+
+    let read = stream.read(&mut buffer).unwrap();
+
+    // We do `read - 1` to account for the `\n`
+    let file_name = String::from_utf8_lossy(&buffer[..read - 1]).to_string();
+
+    let file_path = settings.output.join(&file_name);
+    if file_path.is_file() {
+        let mut file = File::open(file_path).unwrap();
+        let mut content = String::new();
+        file.read_to_string(&mut content);
+        stream.write_all(content.as_bytes());
+    }
 }

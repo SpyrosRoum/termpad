@@ -28,6 +28,7 @@ fn main() -> Result<()> {
         _ => {}
     }
 
+    // This thread listens to port 9999 for accepting input and creating new files.
     let input_thread = {
         let listener = TcpListener::bind(("0.0.0.0", 9999))?;
         let opt = Arc::clone(&opt);
@@ -43,6 +44,7 @@ fn main() -> Result<()> {
         })
     };
 
+    // This thread listens to port 8888 for accepting file names and returning their content.
     let output_thread = {
         let listener = TcpListener::bind(("0.0.0.0", 8888))?;
         let opt = Arc::clone(&opt);
@@ -88,19 +90,8 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut file = File::create(file).unwrap();
     file.write_all(&buffer[..read]).unwrap();
 
-    let mut addr = if settings.https {
-        String::from("https://")
-    } else {
-        String::from("http://")
-    };
-    addr.push_str(&settings.domain);
-    if !settings.domain.ends_with('/') {
-        addr.push('/');
-    }
-    addr.push_str(name.as_str());
-    addr.push('\n');
-
-    stream.write_all(addr.as_ref()).unwrap();
+    let url = utils::gen_url(&settings.domain, &name, settings.https);
+    stream.write_all(url.as_ref()).unwrap();
 }
 
 fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {

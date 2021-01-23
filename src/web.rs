@@ -1,5 +1,6 @@
-use std::{convert::Infallible, sync::Arc};
+use std::{convert::Infallible, fs, sync::Arc};
 
+use anyhow::Context;
 use askama::Template;
 use tokio::runtime::Runtime;
 use warp::{self, Filter};
@@ -13,7 +14,9 @@ struct PasteTemplate {
 }
 
 pub fn web_main(settings: Arc<Opt>) {
-    let rt = Runtime::new().unwrap();
+    let rt = Runtime::new()
+        .context("Failed to start tokio runtime")
+        .unwrap();
 
     rt.block_on(async {
         let show_paste_route = warp::path!(String)
@@ -38,12 +41,17 @@ async fn show_paste(name: String, settings: Arc<Opt>) -> Result<Box<dyn warp::Re
     // ToDo handle the case that we didn't find the file better
     let file_path = settings.output.join(&name.to_lowercase());
 
-    return if file_path.is_file() {
-        let code = std::fs::read_to_string(file_path).unwrap();
+    let html = if file_path.is_file() {
+        let code = fs::read_to_string(file_path)
+            .context("Failed to read paste")
+            .unwrap();
         let html = PasteTemplate { code };
-        let html: String = html.render().unwrap();
-        Ok(Box::new(warp::reply::html(html)))
+        html.render()
+            .context("Failed to render html template")
+            .unwrap()
     } else {
-        Ok(Box::new(warp::reply::html("Oh no")))
+        String::from("Oh no")
     };
+
+    Ok(Box::new(warp::reply::html(html)))
 }

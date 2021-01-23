@@ -12,6 +12,7 @@ $ echo "Hello World!" | nc localhost 9999
 AngryDog
 $ # Or
 $ cat file | nc localhost 9999
+ModernAverageOcean
 ```
 
 And this to retrieve saved text:

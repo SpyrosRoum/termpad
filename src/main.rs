@@ -61,12 +61,16 @@ fn main() -> Result<()> {
             }
         })
     };
+    println!("Listening in port 9999 for input");
+    println!("Listening in port 8888 for output");
 
     #[cfg(feature = "web")]
     {
         let opt = Arc::clone(&opt);
         thread::spawn(move || web::web_main(opt));
+        println!("Web server running in port 3030");
     }
+    println!("====================");
 
     input_thread.join().unwrap();
     output_thread.join().unwrap();
@@ -74,11 +78,18 @@ fn main() -> Result<()> {
 }
 
 fn handle_client(stream: TcpStream, settings: Arc<Opt>, input: bool) {
-    if input {
+    let addr = stream.peer_addr();
+    let ip = addr.map_or(String::from("n/a"), |addr| addr.to_string());
+
+    let direction = if input {
         handle_client_input(stream, settings);
+        "Getting input from"
     } else {
         handle_client_output(stream, settings);
-    }
+        "Sending output to"
+    };
+
+    println!("{} {}", direction, ip);
 }
 
 fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {

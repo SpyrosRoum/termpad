@@ -1,13 +1,16 @@
-use std::{
-    convert::Infallible,
-    io::{BufRead, BufReader},
-    sync::Arc,
-};
+use std::{convert::Infallible, sync::Arc};
 
+use askama::Template;
 use tokio::runtime::Runtime;
 use warp::{self, Filter};
 
 use crate::options::Opt;
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct PasteTemplate {
+    code: String,
+}
 
 pub fn web_main(settings: Arc<Opt>) {
     let rt = Runtime::new().unwrap();
@@ -31,29 +34,16 @@ fn with_settings(
 }
 
 async fn show_paste(name: String, settings: Arc<Opt>) -> Result<Box<dyn warp::Reply>, Infallible> {
-    // FixMe Really bad solution, no syntax highlighting, doesn't keep indentation, white
-    let mut html = String::from(
-        r#"
-<html>
-    <head>
-        <title>termpad</title>
-    </head>
-    <body>
-"#,
-    );
+    // ToDo Add syntax highlighting and over all theme
+    // ToDo handle the case that we didn't find the file better
     let file_path = settings.output.join(&name.to_lowercase());
 
-    if file_path.is_file() {
-        let file = std::fs::File::open(file_path).unwrap();
-        let reader = BufReader::new(file);
-        for line in reader.lines() {
-            html.push_str(line.unwrap().as_str());
-            html.push_str("</br>");
-        }
+    return if file_path.is_file() {
+        let code = std::fs::read_to_string(file_path).unwrap();
+        let html = PasteTemplate { code };
+        let html: String = html.render().unwrap();
+        Ok(Box::new(warp::reply::html(html)))
     } else {
-        html.push_str("No luck");
+        Ok(Box::new(warp::reply::html("Oh no")))
     };
-    html.push_str("</body></html>");
-
-    Ok(Box::new(warp::reply::html(html)))
 }

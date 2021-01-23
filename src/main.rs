@@ -34,16 +34,19 @@ fn main() -> Result<()> {
     let input_thread = {
         let listener = TcpListener::bind(("0.0.0.0", 9999))?;
         let opt = Arc::clone(&opt);
-        thread::Builder::new().name(String::from("Input thread")).spawn(move || {
-            for stream in listener.incoming() {
-                if stream.is_err() {
-                    continue;
+        thread::Builder::new()
+            .name(String::from("Input thread"))
+            .spawn(move || {
+                for stream in listener.incoming() {
+                    if stream.is_err() {
+                        continue;
+                    }
+                    let stream = stream.unwrap();
+                    let opt = Arc::clone(&opt);
+                    thread::spawn(move || handle_client(stream, opt, true));
                 }
-                let stream = stream.unwrap();
-                let opt = Arc::clone(&opt);
-                thread::spawn(move || handle_client(stream, opt, true));
-            }
-        }).context("Failed to start Input thread")?
+            })
+            .context("Failed to start Input thread")?
     };
     println!("Listening to port 9999 for input");
 
@@ -51,23 +54,29 @@ fn main() -> Result<()> {
     let output_thread = {
         let listener = TcpListener::bind(("0.0.0.0", 8888))?;
         let opt = Arc::clone(&opt);
-        thread::Builder::new().name(String::from("Output thread")).spawn(move || {
-            for stream in listener.incoming() {
-                if stream.is_err() {
-                    continue;
+        thread::Builder::new()
+            .name(String::from("Output thread"))
+            .spawn(move || {
+                for stream in listener.incoming() {
+                    if stream.is_err() {
+                        continue;
+                    }
+                    let stream = stream.unwrap();
+                    let opt = Arc::clone(&opt);
+                    thread::spawn(move || handle_client(stream, opt, false));
                 }
-                let stream = stream.unwrap();
-                let opt = Arc::clone(&opt);
-                thread::spawn(move || handle_client(stream, opt, false));
-            }
-        }).context("Failed to start Output thread")?
+            })
+            .context("Failed to start Output thread")?
     };
     println!("Listening to port 8888 for output");
 
     #[cfg(feature = "web")]
     {
         let opt = Arc::clone(&opt);
-        thread::Builder::new().name(String::from("Web thread")).spawn(move || web::web_main(opt)).context("Failed to start Web thread")?;
+        thread::Builder::new()
+            .name(String::from("Web thread"))
+            .spawn(move || web::web_main(opt))
+            .context("Failed to start Web thread")?;
         println!("Web server running in port 3030");
     }
     println!("====================");

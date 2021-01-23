@@ -23,3 +23,19 @@ pub fn gen_name() -> String {
 
     format!("{}{}{}", adj1, adj2, noun)
 }
+
+#[cfg(feature = "web")]
+pub fn gen_base_url(domain: &str, https: bool) -> String {
+    let mut url = if https {
+        String::from("https://")
+    } else {
+        String::from("http://")
+    };
+
+    url.push_str(domain);
+    if !domain.ends_with('/') {
+        url.push('/');
+    }
+
+    url
+}

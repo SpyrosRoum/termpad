@@ -1,5 +1,7 @@
 mod options;
 mod utils;
+#[cfg(feature = "web")]
+mod web;
 
 use std::{
     fs::{create_dir_all, File},
@@ -60,6 +62,12 @@ fn main() -> Result<()> {
         })
     };
 
+    #[cfg(feature = "web")]
+    {
+        let opt = Arc::clone(&opt);
+        thread::spawn(move || web::web_main(opt));
+    }
+
     input_thread.join().unwrap();
     output_thread.join().unwrap();
     Ok(())
@@ -79,7 +87,7 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let read = stream.read(&mut buffer).unwrap();
 
     let mut file = settings.output.clone();
-    let mut name = loop {
+    let name = loop {
         let name = utils::gen_name();
         file.push(name.to_lowercase());
         if !file.is_file() {
@@ -91,9 +99,16 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut file = File::create(file).unwrap();
     file.write_all(&buffer[..read]).unwrap();
 
-    // The name is usually printed on the other side so we just add a newline here
-    name.push('\n');
-    stream.write_all(name.as_bytes()).unwrap();
+    // The answer is usually printed on the other side so we just add a newline here
+    let mut answer = String::new();
+    #[cfg(feature = "web")]
+    {
+        let url = utils::gen_base_url(&settings.domain, settings.https);
+        answer.push_str(url.as_str());
+    }
+    answer.push_str(name.as_str());
+    answer.push('\n');
+    stream.write_all(answer.as_bytes()).unwrap();
 }
 
 fn handle_client_output(mut stream: TcpStream, settings: Arc<Opt>) {

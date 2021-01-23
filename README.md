@@ -62,7 +62,7 @@ $ termpad --https
 ```shell
 $ git clone https://github.com/SpyrosRoum/termpad.git
 $ cd termpad
-$ # If you want to compile with web server  support:
+$ # If you want to compile with web server support:
 $ cargo build --release --features web
 $ # If you only want to use it from the terminal:
 $ cargo build --release

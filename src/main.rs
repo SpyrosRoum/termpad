@@ -20,7 +20,12 @@ use options::Opt;
 fn main() -> Result<()> {
     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed)
         .context("Failed to initialise logger.")?;
-    let opt: Arc<Opt> = Arc::new(Opt::from_args());
+
+    let mut opt: Opt = Opt::from_args();
+    opt.output = utils::expand_tilde(&opt.output)
+        .context("I could not find your home directory, please provide a full path.")
+        .unwrap();
+    let opt = Arc::new(opt);
 
     fs::create_dir_all(&opt.output).context(format!(
         "Failed to create directory `{}`",

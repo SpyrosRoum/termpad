@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use rand::prelude::*;
@@ -39,4 +39,25 @@ pub fn gen_url(domain: &str, name: &str, https: bool) -> String {
     url.push_str(name);
 
     url
+}
+
+pub fn expand_tilde<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+    let p = path.as_ref();
+
+    if !p.starts_with("~") {
+        return Some(p.to_path_buf());
+    }
+    if p == Path::new("~") {
+        return dirs_next::home_dir();
+    }
+    dirs_next::home_dir().map(|mut h| {
+        if h == Path::new("/") {
+            // Corner case: `h` root directory;
+            // don't prepend extra `/`, just drop the tilde.
+            p.strip_prefix("~").unwrap().to_path_buf()
+        } else {
+            h.push(p.strip_prefix("~/").unwrap());
+            h
+        }
+    })
 }

@@ -6,7 +6,12 @@ use structopt::StructOpt;
 #[structopt(name = "termpad")]
 pub struct Opt {
     /// Relative or absolute path to the directory where you want to store user-posted pastes.
-    #[structopt(short, long, parse(from_os_str), default_value = "./pastes/")]
+    #[structopt(
+        short,
+        long,
+        parse(from_os_str),
+        default_value = "~/.local/share/termpad"
+    )]
     pub output: PathBuf,
     /// This will be used as to construct the url that is returned to the client.
     /// Value will be prepended with `http`.

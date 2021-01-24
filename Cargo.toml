@@ -15,6 +15,7 @@ anyhow = "1"
 rand = "0.8"
 simplelog = "0.9"
 log = "0.4"
+dirs-next = "2"
 
 warp = "0.3"
 tokio = { version = "1", features = ["full"] }

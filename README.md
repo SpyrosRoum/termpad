@@ -38,7 +38,7 @@ $ termpad -B 1024
 ```
 
 ### Output (`-o` or `--output`, env = `OUTPUT`)
-Relative or absolute path to the directory where you want to store user-posted pastes (Default: `./pastes/`)
+Relative or absolute path to the directory where you want to store user-posted pastes (Default: `~/.local/share/termpad/`)
 ```shell
 $ termpad -o /home/www/pastes/
 ```

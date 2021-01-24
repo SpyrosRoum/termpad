@@ -1,0 +1,19 @@
+version: "3.4"
+
+services:
+  app:
+    image: spyrosr/termpad
+    ports:
+      - 9999:9999 # TCP for input
+      - 8888:8888 # TCP for output
+      - 3030:3030 # Web server
+    environment:
+      - DOMAIN_NAME=example.com # Default: localhost
+      - HTTPS=true # Default: false
+    volumes:
+      - data:$HOME/.local/share/termpad/
+    restart: always
+
+volumes:
+  data:
+    name: termpad

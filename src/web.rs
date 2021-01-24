@@ -23,8 +23,9 @@ pub fn web_main(settings: Arc<Opt>) {
             .and(warp::get())
             .and(with_settings(settings))
             .and_then(show_paste);
+        let css = warp::path("css").and(warp::fs::file("static/app.css"));
 
-        warp::serve(show_paste_route)
+        warp::serve(show_paste_route.or(css))
             .run(([0, 0, 0, 0], 3030))
             .await;
     });
@@ -37,7 +38,6 @@ fn with_settings(
 }
 
 async fn show_paste(name: String, settings: Arc<Opt>) -> Result<Box<dyn warp::Reply>, Infallible> {
-    // ToDo Add syntax highlighting and over all theme
     // ToDo handle the case that we didn't find the file better
     let file_path = settings.output.join(&name.to_lowercase());
 

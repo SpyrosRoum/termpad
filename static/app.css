@@ -1,0 +1,17 @@
+body {
+    background-color:#282a36
+}
+
+.hljs-ln-numbers {
+    text-align: left;
+    color: #ccc;
+    border-right: 1px solid #999;
+}
+
+.hljs-ln-code.hljs-ln-code {
+    padding-left: 10px;
+}
+
+.hljs-ln-code, .hljs-ln-numbers {
+    line-height: 16px;
+}

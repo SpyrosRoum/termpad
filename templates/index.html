@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>termpad</title>
+
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/dracula.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+
+    <script>
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="/css/static/app.css"/>
 </head>
     <body>
         <pre><code>{{ code }}</code></pre>

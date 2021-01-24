@@ -27,16 +27,17 @@ In this case you can either open the url or use the key in the same way as befor
 
 
 ## Server Usage
+### Note that environment variables are checked before assigning the default value.
 If termpad has been compiled **without** the `web` flag these are the options you have when running it:
 
-### Buffer Size (`-B` or `--buffer-size`)
+### Buffer Size (`-B` or `--buffer-size`, env = `BUFFER_SIZE`)
 This parameter defines size of the buffer used for getting data from the user.   
 Maximum size (in bytes) of all input files is defined by this value. (Default: 50.000)  
 ```shell
 $ termpad -B 1024
 ```
 
-### Output (`-o` or `--output`)
+### Output (`-o` or `--output`, env = `OUTPUT`)
 Relative or absolute path to the directory where you want to store user-posted pastes (Default: `./pastes/`)
 ```shell
 $ termpad -o /home/www/pastes/
@@ -44,14 +45,14 @@ $ termpad -o /home/www/pastes/
  
 If termpad was compiled **with** the `web` flag you have a few more options:
 
-### Domain (`-d` or `--domain`)
+### Domain (`-d` or `--domain`, env = `DOMAIN`)
 Used to construct the url returned to the user. `http` is added as a prefix (Default: `localhost`)
 ```shell
 $ termpad -d example.com
 ```
 This will return urls like: `http://example.com/AngryDog`
 
-### https (`--https`)
+### https (`--https`, env = `HTTPS`)
 If set, urls will start with `https` instead of `http`
 ```shell
 $ termpad --https

@@ -1,6 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::{
+    fs::File,
+    path::{Path, PathBuf},
+};
 
-use anyhow::Result;
 use rand::prelude::*;
 
 // List of English adjective words generated based on the data/adjectives.txt file
@@ -9,9 +11,9 @@ pub const ADJECTIVES: &[&str] = &include!(concat!(env!("OUT_DIR"), "/adjectives.
 // List of English noun words generated based on the data/nouns.txt file
 pub const NOUNS: &[&str] = &include!(concat!(env!("OUT_DIR"), "/nouns.rs"));
 
-pub fn dir_is_writable(path: &Path) -> Result<bool> {
-    let meta = path.metadata()?;
-    Ok(!meta.permissions().readonly())
+pub fn dir_is_writable(path: &Path) -> bool {
+    let file_path = path.join("test_permissions_file");
+    File::create(file_path).is_ok()
 }
 
 pub fn gen_name() -> String {

@@ -31,11 +31,9 @@ fn main() -> Result<()> {
         "Failed to create directory `{}`",
         opt.output.display()
     ))?;
-    match utils::dir_is_writable(&opt.output) {
-        Ok(false) | Err(_) => {
-            bail!(format!("`{}` is not writeable", opt.output.display()));
-        }
-        _ => {}
+    if !utils::dir_is_writable(&opt.output) {
+        error!("{} is not writeable, exiting", &opt.output.display());
+        bail!("{} is not writeable, exiting", opt.output.display());
     }
     info!("Using `{}` for saving files", &opt.output.display());
 

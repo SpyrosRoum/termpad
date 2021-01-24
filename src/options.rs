@@ -14,12 +14,10 @@ pub struct Opt {
         env = "OUTPUT"
     )]
     pub output: PathBuf,
-    #[cfg(feature = "web")]
     /// This will be used as to construct the url that is returned to the client.
     /// Value will be prepended with `http`.
     #[structopt(short, long, default_value = "localhost", env = "DOMAIN")]
     pub domain: String,
-    #[cfg(feature = "web")]
     /// If set, returns the url with `https` prefix instead of `http`.
     #[structopt(long, env = "HTTPS")]
     pub https: bool,

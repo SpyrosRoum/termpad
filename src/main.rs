@@ -1,6 +1,5 @@
 mod options;
 mod utils;
-#[cfg(feature = "web")]
 mod web;
 
 use std::{
@@ -85,14 +84,11 @@ fn main() -> Result<()> {
     };
     info!("Listening to port 8888 for output");
 
-    #[cfg(feature = "web")]
-    {
-        let opt = Arc::clone(&opt);
-        thread::Builder::new()
-            .name(String::from("Web thread"))
-            .spawn(move || web::web_main(opt))
-            .context("Failed to start Web thread")?;
-    }
+    thread::Builder::new()
+        .name(String::from("Web thread"))
+        .spawn(move || web::web_main(opt))
+        .context("Failed to start Web thread")?;
+
     println!("====================");
 
     input_thread.join().unwrap();
@@ -145,18 +141,12 @@ fn handle_client_input(mut stream: TcpStream, settings: Arc<Opt>) {
     let mut file = file.unwrap();
     file.write_all(&buffer[..read]).unwrap();
 
-    // The answer is usually printed on the other side so we just add a newline here
-    let mut answer = String::new();
-    #[cfg(feature = "web")]
-    {
-        let url = utils::gen_base_url(&settings.domain, settings.https);
-        answer.push_str(url.as_str());
-    }
-    answer.push_str(name.as_str());
-    answer.push('\n');
+    // The url is usually printed on the other side so we just add a newline here
+    let mut url = utils::gen_url(&settings.domain, name.as_str(), settings.https);
+    url.push('\n');
 
     stream
-        .write_all(answer.as_bytes())
+        .write_all(url.as_bytes())
         .map_err(|e| error!("Could not send reply to input request: {:?}", e))
         .ok();
 }

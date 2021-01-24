@@ -24,8 +24,7 @@ pub fn gen_name() -> String {
     format!("{}{}{}", adj1, adj2, noun)
 }
 
-#[cfg(feature = "web")]
-pub fn gen_base_url(domain: &str, https: bool) -> String {
+pub fn gen_url(domain: &str, name: &str, https: bool) -> String {
     let mut url = if https {
         String::from("https://")
     } else {
@@ -36,6 +35,8 @@ pub fn gen_base_url(domain: &str, https: bool) -> String {
     if !domain.ends_with('/') {
         url.push('/');
     }
+
+    url.push_str(name);
 
     url
 }

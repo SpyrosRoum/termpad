@@ -9,10 +9,6 @@ repository = "https://github.com/SpyrosRoum/termpad"
 license-file = "LICENSE"
 categories = ["command-line-utilities"]
 
-[features]
-default = []
-web = ["warp", "tokio", "askama"]
-
 [dependencies]
 structopt = "0.3"
 anyhow = "1"
@@ -20,6 +16,6 @@ rand = "0.8"
 simplelog = "0.9"
 log = "0.4"
 
-warp = { version = "0.3", optional = true }
-tokio = { version = "1", features = ["full"], optional = true }
-askama = { version = "0.8", optional = true }
+warp = "0.3"
+tokio = { version = "1", features = ["full"] }
+askama = "0.8"

@@ -7,6 +7,8 @@ use warp::{http::Uri, Filter};
 
 use crate::options::Opt;
 
+const PAGE_404: &str = include_str!("../static/404.html");
+
 #[derive(Template)]
 #[template(path = "index.html")]
 struct PasteTemplate {
@@ -23,10 +25,9 @@ pub fn web_main(settings: Arc<Opt>) {
             .and(warp::get())
             .and(with_settings(settings))
             .and_then(show_paste);
-        let static_files_route = warp::path("static").and(warp::fs::dir("static/"));
-        let route_404 = warp::path("404").and_then(no_file);
+        let route_404 = warp::path("404").map(|| warp::reply::html(PAGE_404));
 
-        warp::serve(route_404.or(show_paste_route).or(static_files_route))
+        warp::serve(route_404.or(show_paste_route))
             .run(([0, 0, 0, 0], 3030))
             .await;
     });
@@ -51,13 +52,6 @@ async fn show_paste(name: String, settings: Arc<Opt>) -> Result<Box<dyn warp::Re
             .unwrap();
         Ok(Box::new(warp::reply::html(html)))
     } else {
-        Ok(Box::new(warp::redirect(Uri::from_static(
-            "/static/404.html",
-        ))))
+        Ok(Box::new(warp::redirect(Uri::from_static("/404"))))
     }
-}
-
-// 404 handler
-async fn no_file() -> Result<Box<dyn warp::Reply>, Infallible> {
-    Ok(Box::new(warp::reply::html("html")))
 }

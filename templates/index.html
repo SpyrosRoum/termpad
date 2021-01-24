@@ -15,9 +15,23 @@
     hljs.initLineNumbersOnLoad();
     </script>
 
-    <link rel="stylesheet" type="text/css" href="/css/static/app.css"/>
+    <style>
+        .hljs-ln-numbers {
+            text-align: left;
+            color: #ccc;
+            border-right: 1px solid #999;
+        }
+
+        .hljs-ln-code.hljs-ln-code {
+            padding-left: 10px;
+        }
+
+        .hljs-ln-code, .hljs-ln-numbers {
+            line-height: 16px;
+        }
+    </style>
 </head>
-    <body>
+    <body style="background-color:#282a36">
         <pre><code>{{ code }}</code></pre>
     </body>
 </html>

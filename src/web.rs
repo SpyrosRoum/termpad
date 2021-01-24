@@ -3,7 +3,7 @@ use std::{convert::Infallible, fs, sync::Arc};
 use anyhow::Context;
 use askama::Template;
 use tokio::runtime::Runtime;
-use warp::{self, Filter};
+use warp::{http::Uri, Filter};
 
 use crate::options::Opt;
 
@@ -23,9 +23,10 @@ pub fn web_main(settings: Arc<Opt>) {
             .and(warp::get())
             .and(with_settings(settings))
             .and_then(show_paste);
-        let css = warp::path("css").and(warp::fs::file("static/app.css"));
+        let static_files_route = warp::path("static").and(warp::fs::dir("static/"));
+        let route_404 = warp::path("404").and_then(no_file);
 
-        warp::serve(show_paste_route.or(css))
+        warp::serve(route_404.or(show_paste_route).or(static_files_route))
             .run(([0, 0, 0, 0], 3030))
             .await;
     });
@@ -38,20 +39,25 @@ fn with_settings(
 }
 
 async fn show_paste(name: String, settings: Arc<Opt>) -> Result<Box<dyn warp::Reply>, Infallible> {
-    // ToDo handle the case that we didn't find the file better
     let file_path = settings.output.join(&name.to_lowercase());
-
-    let html = if file_path.is_file() {
+    if file_path.is_file() {
         let code = fs::read_to_string(file_path)
             .context("Failed to read paste")
             .unwrap();
-        let html = PasteTemplate { code };
-        html.render()
+        let template = PasteTemplate { code };
+        let html = template
+            .render()
             .context("Failed to render html template")
-            .unwrap()
+            .unwrap();
+        Ok(Box::new(warp::reply::html(html)))
     } else {
-        String::from("Oh no")
-    };
+        Ok(Box::new(warp::redirect(Uri::from_static(
+            "/static/404.html",
+        ))))
+    }
+}
 
-    Ok(Box::new(warp::reply::html(html)))
+// 404 handler
+async fn no_file() -> Result<Box<dyn warp::Reply>, Infallible> {
+    Ok(Box::new(warp::reply::html("html")))
 }

@@ -16,9 +16,8 @@ use askama::Template;
 use log::{error, info};
 use rocket::{
     config::{ConfigBuilder, Environment},
-    http::Status,
-    response::{content, Debug},
-    Data, Request, State,
+    response::{content, Debug, Redirect},
+    Data, State,
 };
 use simplelog::{Config, LevelFilter, TermLogger, TerminalMode};
 use structopt::StructOpt;
@@ -35,6 +34,9 @@ fn main() -> anyhow::Result<()> {
     opt.output = utils::expand_tilde(&opt.output)
         .context("I could not find your home directory, please provide a full path.")
         .unwrap();
+    if opt.domain == "localhost" {
+        opt.domain = format!("localhost:{}", opt.port);
+    }
     // So it's not mutable anymore
     let opt = opt;
 
@@ -54,9 +56,8 @@ fn main() -> anyhow::Result<()> {
         .finalize()
         .context("Failed to configure Rocket")?;
     rocket::custom(config)
-        .mount("/", routes![upload, retrieve, retrieve_raw])
+        .mount("/", routes![index, upload, retrieve_raw, retrieve])
         .manage(opt)
-        .register(catchers![not_found])
         .launch();
 
     Ok(())
@@ -81,17 +82,17 @@ fn upload(paste: Data, settings: State<Opt>) -> Result<String, Debug<io::Error>>
 }
 
 #[get("/<key>")]
-fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, Status> {
+fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, Redirect> {
     let file_path = settings.output.join(key.to_lowercase());
     if !file_path.is_file() {
-        return Err(Status::NotFound);
+        return Err(Redirect::to("/?not_found=true"));
     }
 
-    let paste = fs::read_to_string(file_path).map_err(|_| Status::NotFound)?;
+    let paste = fs::read_to_string(file_path).map_err(|_| Redirect::to("/?not_found=true"))?;
     let template = templates::PasteTemplate { code: paste };
     match template.render() {
         Ok(html) => Ok(content::Html(html)),
-        _ => Err(Status::NotFound),
+        _ => Err(Redirect::to("/?not_found=true")),
     }
 }
 
@@ -101,7 +102,22 @@ fn retrieve_raw(key: String, settings: State<Opt>) -> Result<content::Plain<File
     File::open(file_path).map_or_else(|_| Err(String::from("")), |f| Ok(content::Plain(f)))
 }
 
-#[catch(404)]
-fn not_found(_req: &Request) -> content::Html<&'static str> {
-    content::Html(PAGE_404)
+#[get("/?<not_found>")]
+fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String> {
+    let template = templates::IndexTemplate {
+        not_found: not_found.unwrap_or(false),
+        domain: settings.domain.clone(),
+    };
+    match template.render() {
+        Ok(html) => content::Html(html),
+        _ => content::Html(r#"
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>termpad</title>
+        </head>
+        <body style="background-color:#282a36">
+        <h2 style="color:#ccc"> Something went wrong </h2>
+        </body>"#.to_string()),
+    }
 }

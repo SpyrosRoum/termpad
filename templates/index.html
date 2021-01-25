@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>termpad</title>
+
+    <style>
+        body {
+            background-color: #282a36;
+            color: #ccc;
+        }
+
+        a {
+            color: #f1fa8c;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+
+</head>
+<body>
+<div id="container">
+<div id="content">
+    {% if not_found %}
+        <h2 style="color:#ff0000"> You requested for a file that does not exist </h2>
+    {% endif %}
+
+    <h1> termpad </h1>
+    A (self hosted) pastebin for easily sharing text right from the terminal
+    <hr>
+    <p>
+        <h2> Usage </h2>
+        <h3>Upload some text:</h3>
+        With cURL:
+        <pre><code>
+            $ curl -d "Hello World\!" {{domain}}
+            $ curl --data-binary @path/to/file {{domain}}
+        </code></pre>
+        With <a href="https://httpie.io/">HTTPie</a>:
+        <pre><code>
+            $ echo "Hello World\!" | http POST {{domain}}
+            $ http POST {{domain}} < path/to/file
+        </code></pre>
+
+        <h3>Get some text:</h3>
+        With cURL:
+        <pre><code>
+            $ curl {{domain}}<b>/raw/</b>PlainVastAirport
+        </code></pre>
+        With <a href="https://httpie.io/">HTTPie</a>:
+        <pre><code>
+            $ http {{domain}}<b>/raw/</b>PlainVastAirport
+        </code></pre>
+        <b>Don't forget to add that <code>/raw/</code> there or else you will get html code meant for the browser</b>
+    </p>
+    <hr>
+    <p>
+        For server usage and hosting it yourself, check out <a href="https://github.com/SpyrosRoum/termpad">github</a>
+    </p>
+
+</div>
+</div>
+</body>
+</html>

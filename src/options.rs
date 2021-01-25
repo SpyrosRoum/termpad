@@ -20,7 +20,7 @@ pub struct Opt {
     /// If set, returns the url with `https` prefix instead of `http`.
     #[structopt(long, env = "HTTPS")]
     pub https: bool,
-    /// Defines the maximum size (in bytes) of the buffer used for getting data from the user.
-    #[structopt(short = "B", long, default_value = "50000", env = "BUFFER_SIZE")]
-    pub buffer_size: usize,
+    /// The port on which the app should run on
+    #[structopt(short, long, default_value = "8000")]
+    pub port: u16,
 }

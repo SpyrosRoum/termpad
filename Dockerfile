@@ -1,18 +1,18 @@
-FROM rust as planner
+FROM rustlang/rust:nightly as planner
 WORKDIR app
 RUN cargo install cargo-chef
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 
-FROM rust as cacher
+FROM rustlang/rust:nightly as cacher
 WORKDIR app
 RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 
-FROM rust as builder
+FROM rustlang/rust:nightly as builder
 WORKDIR app
 COPY . .
 # Copy over the cached dependencies
@@ -21,7 +21,7 @@ COPY --from=cacher /usr/local/cargo /usr/local/cargo
 RUN cargo build --release --bin termpad
 
 
-FROM rust:1-slim as runtime
+FROM rustlang/rust:nightly-slim as runtime
 WORKDIR app
 COPY --from=builder /app/target/release/termpad /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/termpad"]

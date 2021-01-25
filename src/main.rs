@@ -5,7 +5,10 @@ extern crate rocket;
 mod options;
 mod utils;
 
-use std::{fs, io};
+use std::{
+    fs::{self, File},
+    io,
+};
 
 use anyhow::{bail, Context};
 use log::{error, info};
@@ -82,8 +85,9 @@ fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, 
 }
 
 #[get("/raw/<key>")]
-fn retrieve_raw(key: String, settings: State<Opt>) -> String {
-    utils::actual_retrieve(&settings.output, &key, true).unwrap_or_else(|| String::from(""))
+fn retrieve_raw(key: String, settings: State<Opt>) -> Result<content::Plain<File>, String> {
+    let file_path = settings.output.join(key.to_ascii_lowercase());
+    File::open(file_path).map_or_else(|_| Err(String::from("")), |f| Ok(content::Plain(f)))
 }
 
 #[catch(404)]

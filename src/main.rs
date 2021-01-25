@@ -10,6 +10,7 @@ use std::{fs, io};
 use anyhow::{bail, Context};
 use log::{error, info};
 use rocket::{
+    config::{ConfigBuilder, Environment},
     http::Status,
     response::{content, Debug},
     Data, Request, State,
@@ -42,7 +43,12 @@ fn main() -> anyhow::Result<()> {
     }
     info!("Using `{}` for saving files", &opt.output.display());
 
-    rocket::ignite()
+    let config = ConfigBuilder::new(Environment::Production)
+        .address("0.0.0.0")
+        .port(opt.port)
+        .finalize()
+        .context("Failed to configure Rocket")?;
+    rocket::custom(config)
         .mount("/", routes![upload, retrieve, retrieve_raw])
         .manage(opt)
         .register(catchers![not_found])

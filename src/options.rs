@@ -23,4 +23,7 @@ pub struct Opt {
     /// Defines the maximum size (in bytes) of the buffer used for getting data from the user.
     #[structopt(short = "B", long, default_value = "50000", env = "BUFFER_SIZE")]
     pub buffer_size: usize,
+    /// The port on which the app should run on
+    #[structopt(short, long, default_value = "8000", env = "PORT")]
+    pub port: u16,
 }

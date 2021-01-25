@@ -21,6 +21,6 @@ pub struct Opt {
     #[structopt(long, env = "HTTPS")]
     pub https: bool,
     /// The port on which the app should run on
-    #[structopt(short, long, default_value = "8000", env = "PORT")]
+    #[structopt(short, long, default_value = "8000")]
     pub port: u16,
 }

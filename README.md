@@ -3,12 +3,12 @@
 termpad allows you to easily host a pastebin server for saving and viewing text right from the terminal, or the browser.
 
 ## Client Usage
-Assuming termpad is running in localhost:8000 you can do this to save text:  
+Assuming termpad is running in localhost:8000 you can do this to save text using cURL:  
 ```shell
 $ curl -d "Hello world" localhost:8000
 http://localhost/DullMagnificentLock
 $ # Or
-$ curl --data-binary @file localhost:8000
+$ curl --data-binary @path/to/file localhost:8000
 http://localhost/BrightAliveMotorcycle
 ```
 
@@ -18,6 +18,22 @@ $ curl localhost:8000/raw/TenderCheerfulYacht
 $ # You might optionally want to pipe the output to a pager like less
 $ curl localhost:8000/raw/TenderCheerfulYacht | less
 ```
+
+Or this for [HTTPie](https://httpie.io/):
+```shell
+$ echo "Hello World" | http POST localhost:8000
+http://localhost/DullMagnificentLock
+$ # Or for files:
+$ http POST localhost:8000 < path/to/file
+http://localhost/BrightAliveMotorcycle
+```
+And to get text it's the same as cURL:
+```shell
+$ http localhost:8000/raw/TenderCheerfulYacht
+# Or with a pager
+$ http localhost:8000/raw/TenderCheerfulYacht | less
+```
+
 Note the `/raw/` in the url, without it you will get html output
 
 

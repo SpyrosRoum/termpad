@@ -24,8 +24,6 @@ use structopt::StructOpt;
 
 use options::Opt;
 
-const PAGE_404: &str = include_str!("../static/404.html");
-
 fn main() -> anyhow::Result<()> {
     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed)
         .context("Failed to initialise logger.")?;
@@ -110,7 +108,8 @@ fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String>
     };
     match template.render() {
         Ok(html) => content::Html(html),
-        _ => content::Html(r#"
+        _ => content::Html(
+            r#"
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -118,6 +117,8 @@ fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String>
         </head>
         <body style="background-color:#282a36">
         <h2 style="color:#ccc"> Something went wrong </h2>
-        </body>"#.to_string()),
+        </body>"#
+                .to_string(),
+        ),
     }
 }

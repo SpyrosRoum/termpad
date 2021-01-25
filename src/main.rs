@@ -3,6 +3,7 @@
 extern crate rocket;
 
 mod options;
+mod templates;
 mod utils;
 
 use std::{
@@ -11,6 +12,7 @@ use std::{
 };
 
 use anyhow::{bail, Context};
+use askama::Template;
 use log::{error, info};
 use rocket::{
     config::{ConfigBuilder, Environment},
@@ -80,8 +82,17 @@ fn upload(paste: Data, settings: State<Opt>) -> Result<String, Debug<io::Error>>
 
 #[get("/<key>")]
 fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, Status> {
-    utils::actual_retrieve(&settings.output, &key, false)
-        .map_or_else(|| Err(Status::NotFound), |html| Ok(content::Html(html)))
+    let file_path = settings.output.join(key.to_lowercase());
+    if !file_path.is_file() {
+        return Err(Status::NotFound);
+    }
+
+    let paste = fs::read_to_string(file_path).map_err(|_| Status::NotFound)?;
+    let template = templates::PasteTemplate { code: paste };
+    match template.render() {
+        Ok(html) => Ok(content::Html(html)),
+        _ => Err(Status::NotFound),
+    }
 }
 
 #[get("/raw/<key>")]

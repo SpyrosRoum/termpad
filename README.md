@@ -73,6 +73,11 @@ $ cargo build --release
 $ ./target/release/termpad
 ```
 
+### From cargo:
+```shell
+$ cargo install termpad
+```
+
 ### With docker-compose:
 Either `wget https://raw.githubusercontent.com/SpyrosRoum/termpad/master/docker-compose.yml` or copy the following into `docker-compose.yml`
 ```

@@ -1,6 +1,6 @@
 [package]
 name = "termpad"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Spyros Roum <spyrosr1@gmail.com>"]
 edition = "2018"
 description = "Command line pastebin for sharing terminal output. "

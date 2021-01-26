@@ -16,7 +16,7 @@ use askama::Template;
 use log::{error, info};
 use rocket::{
     config::{ConfigBuilder, Environment},
-    response::{content, Debug, Redirect},
+    response::{content, Debug, Redirect, Stream},
     Data, State,
 };
 use simplelog::{Config, LevelFilter, TermLogger, TerminalMode};
@@ -73,21 +73,38 @@ fn upload(paste: Data, settings: State<Opt>) -> Result<String, Debug<io::Error>>
         // Since the file exists we remove the last part so we can get a new one on the next iteration
         file_path.pop();
     };
-    paste.stream_to_file(file_path)?;
+    file_path.set_extension("zst");
+
+    let file = File::create(file_path)?;
+    // Level 0 uses uses zstd's default (At the moment of writing, 3)
+    zstd::stream::copy_encode(paste.open(), file, 0)?;
+
     let mut url = utils::gen_url(&settings.domain, name.as_str(), settings.https);
     url.push('\n');
+
     Ok(url)
 }
 
 #[get("/<key>")]
 fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, Redirect> {
-    let file_path = settings.output.join(key.to_lowercase());
+    let file_path = {
+        let mut path = settings.output.join(key.to_lowercase());
+        path.set_extension("zst");
+        path
+    };
+
     if !file_path.is_file() {
         return Err(Redirect::to("/?not_found=true"));
     }
 
-    let paste = fs::read_to_string(file_path).map_err(|_| Redirect::to("/?not_found=true"))?;
-    let template = templates::PasteTemplate { code: paste };
+    let code = {
+        let mut dest = Vec::new();
+        zstd::stream::copy_decode(File::open(file_path).unwrap(), &mut dest)
+            .map_err(|_| Redirect::to("/?not_found=true"))?;
+        String::from_utf8_lossy(&dest).to_string()
+    };
+
+    let template = templates::PasteTemplate { code };
     match template.render() {
         Ok(html) => Ok(content::Html(html)),
         _ => Err(Redirect::to("/?not_found=true")),
@@ -95,9 +112,18 @@ fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, 
 }
 
 #[get("/raw/<key>")]
-fn retrieve_raw(key: String, settings: State<Opt>) -> Result<content::Plain<File>, String> {
-    let file_path = settings.output.join(key.to_ascii_lowercase());
-    File::open(file_path).map_or_else(|_| Err(String::from("")), |f| Ok(content::Plain(f)))
+fn retrieve_raw(key: String, settings: State<Opt>) -> Result<Stream<impl io::Read>, &'static str> {
+    let file_path = {
+        let mut path = settings.output.join(key.to_ascii_lowercase());
+        path.set_extension("zst");
+        path
+    };
+    let decoder = {
+        let file = File::open(file_path).map_err(|_| "")?;
+        zstd::Decoder::new(file).map_err(|_| "")?
+    };
+
+    Ok(Stream::from(decoder))
 }
 
 #[get("/?<not_found>")]

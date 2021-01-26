@@ -19,3 +19,4 @@ dirs-next = "2"
 
 rocket = { version = "0.4", default_features = false }
 askama = "0.8"
+zstd = "0.6"

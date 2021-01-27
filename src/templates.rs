@@ -13,4 +13,6 @@ pub struct IndexTemplate {
     pub not_found: bool,
     /// The domain name being used for this instance
     pub domain: String,
+    /// How many days to keep files for. 0 means forever
+    pub delete_after: u32,
 }

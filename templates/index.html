@@ -59,6 +59,14 @@
     </p>
     <hr>
     <p>
+        {% if delete_after == 0 %}
+            This instance is currently configured to keep files forever
+        {% else %}
+            This instance is currently configured to keep files for {{delete_after}} days
+        {% endif %}
+    </p>
+    <hr>
+    <p>
         For server usage and hosting it yourself, check out <a href="https://github.com/SpyrosRoum/termpad">github</a>
     </p>
 

@@ -135,6 +135,7 @@ fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String>
     let template = templates::IndexTemplate {
         not_found: not_found.unwrap_or(false),
         domain: settings.domain.clone(),
+        delete_after: settings.delete_after,
     };
     match template.render() {
         Ok(html) => content::Html(html),

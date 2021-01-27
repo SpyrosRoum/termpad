@@ -11,19 +11,19 @@ use log::{error, info, warn};
 use rand::prelude::*;
 
 // List of English adjective words generated based on the data/adjectives.txt file
-pub const ADJECTIVES: &[&str] = &include!(concat!(env!("OUT_DIR"), "/adjectives.rs"));
+pub(crate) const ADJECTIVES: &[&str] = &include!(concat!(env!("OUT_DIR"), "/adjectives.rs"));
 
 // List of English noun words generated based on the data/nouns.txt file
-pub const NOUNS: &[&str] = &include!(concat!(env!("OUT_DIR"), "/nouns.rs"));
+pub(crate) const NOUNS: &[&str] = &include!(concat!(env!("OUT_DIR"), "/nouns.rs"));
 
 const SECS_IN_DAY: u64 = 86400;
 
-pub fn dir_is_writable(path: &Path) -> bool {
+pub(crate) fn dir_is_writable(path: &Path) -> bool {
     let file_path = path.join("test_permissions_file");
     File::create(file_path).is_ok()
 }
 
-pub fn gen_name() -> String {
+pub(crate) fn gen_name() -> String {
     let mut rng = thread_rng();
 
     let adj1 = ADJECTIVES.choose(&mut rng).unwrap();
@@ -33,7 +33,7 @@ pub fn gen_name() -> String {
     format!("{}{}{}", adj1, adj2, noun)
 }
 
-pub fn gen_url(domain: &str, name: &str, https: bool) -> String {
+pub(crate) fn gen_url(domain: &str, name: &str, https: bool) -> String {
     let mut url = if https {
         String::from("https://")
     } else {
@@ -50,7 +50,7 @@ pub fn gen_url(domain: &str, name: &str, https: bool) -> String {
     url
 }
 
-pub fn expand_tilde<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+pub(crate) fn expand_tilde<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
     let p = path.as_ref();
 
     if !p.starts_with("~") {
@@ -71,7 +71,7 @@ pub fn expand_tilde<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
     })
 }
 
-pub fn clean_files_task(out: &Path, delete_after: u32) {
+pub(crate) fn clean_files_task(out: &Path, delete_after: u32) {
     let out = out.to_owned();
     let dur = Duration::from_secs(2 * SECS_IN_DAY);
     thread::spawn(move || loop {

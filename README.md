@@ -64,6 +64,13 @@ If set, urls will start with `https` instead of `http`
 $ termpad --https
 ```
 
+
+### Delete files (`--delete-after`, env = `DELETE_AFTER`)
+How many days to keep files for. If set to `0` it will keep them forever (Default: `120`)
+```shell
+$ termpad --delete-after 60
+```
+
 ## Install
 ### From source:
 ```shell

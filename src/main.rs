@@ -48,6 +48,10 @@ fn main() -> anyhow::Result<()> {
     }
     info!("Using `{}` for saving files", &opt.output.display());
 
+    if opt.delete_after != 0 {
+        utils::clean_files_task(&opt.output, opt.delete_after);
+    }
+
     let config = ConfigBuilder::new(Environment::Production)
         .address("0.0.0.0")
         .port(opt.port)
@@ -131,6 +135,7 @@ fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String>
     let template = templates::IndexTemplate {
         not_found: not_found.unwrap_or(false),
         domain: settings.domain.clone(),
+        delete_after: settings.delete_after,
     };
     match template.render() {
         Ok(html) => content::Html(html),

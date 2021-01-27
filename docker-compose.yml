@@ -6,8 +6,9 @@ services:
     ports:
       - 8000:8000
     environment:
-      - DOMAIN_NAME=example.com
+      - DOMAIN_NAME=example.com # You probably want to change this
       - HTTPS=true
+      - DELETE_AFTER=0 # If you are hosting for yourself keeping them forever is probably fine
     volumes:
       - data:$HOME/.local/share/termpad/
     restart: always

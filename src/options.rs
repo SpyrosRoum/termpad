@@ -23,4 +23,7 @@ pub struct Opt {
     /// The port on which the app should run on
     #[structopt(short, long, default_value = "8000")]
     pub port: u16,
+    /// How many days to keep files for. A value of 0 means forever
+    #[structopt(long, default_value = "120", env = "DELETE_AFTER")]
+    pub delete_after: u32,
 }

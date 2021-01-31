@@ -35,6 +35,7 @@
     <p>
         <h2> Usage </h2>
         <h3>Upload some text:</h3>
+        <p>From the <a href="/">web</a></p>
         With cURL:
         <pre><code>
             $ curl -d "Hello World\!" {{domain}}
@@ -56,6 +57,14 @@
             $ http {{domain}}<b>/raw/</b>PlainVastAirport
         </code></pre>
         <b>Don't forget to add that <code>/raw/</code> there or else you will get html code meant for the browser</b>
+    </p>
+    <hr>
+    <p>
+        {% if delete_after == 0 %}
+            This instance is currently configured to keep files forever
+        {% else %}
+            This instance is currently configured to keep files for {{delete_after}} days
+        {% endif %}
     </p>
     <hr>
     <p>

@@ -29,8 +29,20 @@
         .hljs-ln-code, .hljs-ln-numbers {
             line-height: 16px;
         }
+
+        #key {
+        	position: fixed;
+	        top: 0px;
+        	right: 0px;
+	        z-index: +1000; /* watch out */
+        }
     </style>
 </head>
+    <div id="key">
+        <button onclick="window.location.href = '/';">New</button>
+        <button onclick="window.location.href = '/usage';">Usage</button>
+    </div>
+
     <body style="background-color:#282a36">
         <pre><code>{{ code }}</code></pre>
     </body>

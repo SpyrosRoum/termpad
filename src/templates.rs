@@ -2,17 +2,26 @@ use askama::Template;
 
 #[derive(Template)]
 #[template(path = "paste.html")]
-pub struct PasteTemplate {
-    pub code: String,
+pub(crate) struct PasteTemplate {
+    pub(crate) code: String,
 }
 
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct IndexTemplate {
+pub(crate) struct IndexTemplate {
     /// Indicates if the user searched for a file that doesn't exist
-    pub not_found: bool,
+    pub(crate) not_found: bool,
     /// The domain name being used for this instance
-    pub domain: String,
+    pub(crate) domain: String,
     /// How many days to keep files for. 0 means forever
-    pub delete_after: u32,
+    pub(crate) delete_after: u32,
+}
+
+#[derive(Template)]
+#[template(path = "input.html")]
+pub(crate) struct InputTemplate {
+    /// The domain name being used for this instance
+    pub(crate) domain: String,
+    /// How many days to keep files for. 0 means forever
+    pub(crate) delete_after: u32,
 }

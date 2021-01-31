@@ -58,11 +58,42 @@ fn main() -> anyhow::Result<()> {
         .finalize()
         .context("Failed to configure Rocket")?;
     rocket::custom(config)
-        .mount("/", routes![index, upload, retrieve_raw, retrieve])
+        .mount(
+            "/",
+            routes![usage, upload, web_input, retrieve_raw, retrieve],
+        )
         .manage(opt)
         .launch();
 
     Ok(())
+}
+
+#[get("/")]
+fn web_input(settings: State<Opt>) -> content::Html<String> {
+    let domain = if settings.https {
+        format!("https://{}", settings.domain)
+    } else {
+        format!("http://{}", settings.domain)
+    };
+    let template = templates::InputTemplate {
+        domain,
+        delete_after: settings.delete_after,
+    };
+    match template.render() {
+        Ok(html) => content::Html(html),
+        _ => content::Html(
+            r#"
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>termpad</title>
+        </head>
+        <body style="background-color:#282a36">
+        <h2 style="color:#ccc"> Something went wrong </h2>
+        </body>"#
+                .to_string(),
+        ),
+    }
 }
 
 #[post("/", data = "<paste>")]
@@ -98,20 +129,20 @@ fn retrieve(key: String, settings: State<Opt>) -> Result<content::Html<String>, 
     };
 
     if !file_path.is_file() {
-        return Err(Redirect::to("/?not_found=true"));
+        return Err(Redirect::to("/usage?not_found=true"));
     }
 
     let code = {
         let mut dest = Vec::new();
         zstd::stream::copy_decode(File::open(file_path).unwrap(), &mut dest)
-            .map_err(|_| Redirect::to("/?not_found=true"))?;
+            .map_err(|_| Redirect::to("/usage?not_found=true"))?;
         String::from_utf8_lossy(&dest).to_string()
     };
 
     let template = templates::PasteTemplate { code };
     match template.render() {
         Ok(html) => Ok(content::Html(html)),
-        _ => Err(Redirect::to("/?not_found=true")),
+        _ => Err(Redirect::to("/usage?not_found=true")),
     }
 }
 
@@ -130,8 +161,8 @@ fn retrieve_raw(key: String, settings: State<Opt>) -> Result<Stream<impl io::Rea
     Ok(Stream::from(decoder))
 }
 
-#[get("/?<not_found>")]
-fn index(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String> {
+#[get("/usage?<not_found>")]
+fn usage(not_found: Option<bool>, settings: State<Opt>) -> content::Html<String> {
     let template = templates::IndexTemplate {
         not_found: not_found.unwrap_or(false),
         domain: settings.domain.clone(),

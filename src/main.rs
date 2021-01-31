@@ -24,6 +24,8 @@ use structopt::StructOpt;
 
 use options::Opt;
 
+const INPUT_PAGE: &str = include_str!("../static/input.html");
+
 fn main() -> anyhow::Result<()> {
     TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed)
         .context("Failed to initialise logger.")?;
@@ -69,31 +71,8 @@ fn main() -> anyhow::Result<()> {
 }
 
 #[get("/")]
-fn web_input(settings: State<Opt>) -> content::Html<String> {
-    let domain = if settings.https {
-        format!("https://{}", settings.domain)
-    } else {
-        format!("http://{}", settings.domain)
-    };
-    let template = templates::InputTemplate {
-        domain,
-        delete_after: settings.delete_after,
-    };
-    match template.render() {
-        Ok(html) => content::Html(html),
-        _ => content::Html(
-            r#"
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <title>termpad</title>
-        </head>
-        <body style="background-color:#282a36">
-        <h2 style="color:#ccc"> Something went wrong </h2>
-        </body>"#
-                .to_string(),
-        ),
-    }
+fn web_input() -> content::Html<String> {
+    content::Html(INPUT_PAGE.to_string())
 }
 
 #[post("/", data = "<paste>")]

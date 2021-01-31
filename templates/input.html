@@ -40,11 +40,38 @@
             font-family: monospace;
             text-align: right;
         }
+
+        #key {
+        	position: fixed;
+	        top: 0px;
+        	right: 0px;
+	        z-index: +1000; /* watch out */
+        }
     </style>
+
+    <script>
+        function save() {
+            var text = document.getElementById("code").value;
+
+            fetch("/", {
+                method: "POST",
+                body: text
+            }).then(res => {
+                res.text().then(url => {
+                    window.location.href = url;
+                });
+            });
+        }
+    </script>
 
 </head>
 <body>
+    <div id="key">
+        <button onclick="save()">Save</button>
+        <button onclick="window.location.href = '/';">Usage</button>
+    </div>
+
     <div id="prompt">></div>
-    <textarea spellcheck="true"></textarea>
+    <textarea id="code" spellcheck="true"></textarea>
 </body>
 </html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>termpad</title>
+
+    <style>
+        body {
+            background-color: #282a36;
+            color: #ccc;
+            padding: 20px 50px;
+            margin: 0;
+        }
+
+        textarea {
+            background: 0 0;
+            border: 0;
+            color: #fff;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: monospace;
+            outline: none;
+            resize: none;
+            font-size: 13px;
+            margin-top: 0;
+            margin-bottom: 0;
+            display: block;
+            resize: vertical;
+        }
+
+        #prompt {
+            color: #7d7d7d;
+            z-index: -1000;
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 30px;
+            font-size: 13px;
+            font-family: monospace;
+            text-align: right;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="prompt">></div>
+    <textarea spellcheck="true"></textarea>
+</body>
+</html>

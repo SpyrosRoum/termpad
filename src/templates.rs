@@ -16,3 +16,12 @@ pub(crate) struct IndexTemplate {
     /// How many days to keep files for. 0 means forever
     pub(crate) delete_after: u32,
 }
+
+#[derive(Template)]
+#[template(path = "input.html")]
+pub(crate) struct InputTemplate {
+    /// The domain name being used for this instance
+    pub(crate) domain: String,
+    /// How many days to keep files for. 0 means forever
+    pub(crate) delete_after: u32,
+}

@@ -58,11 +58,42 @@ fn main() -> anyhow::Result<()> {
         .finalize()
         .context("Failed to configure Rocket")?;
     rocket::custom(config)
-        .mount("/", routes![index, upload, retrieve_raw, retrieve])
+        .mount(
+            "/",
+            routes![index, upload, web_input, retrieve_raw, retrieve],
+        )
         .manage(opt)
         .launch();
 
     Ok(())
+}
+
+#[get("/input")]
+fn web_input(settings: State<Opt>) -> content::Html<String> {
+    let domain = if settings.https {
+        format!("https://{}", settings.domain)
+    } else {
+        format!("http://{}", settings.domain)
+    };
+    let template = templates::InputTemplate {
+        domain,
+        delete_after: settings.delete_after,
+    };
+    match template.render() {
+        Ok(html) => content::Html(html),
+        _ => content::Html(
+            r#"
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>termpad</title>
+        </head>
+        <body style="background-color:#282a36">
+        <h2 style="color:#ccc"> Something went wrong </h2>
+        </body>"#
+                .to_string(),
+        ),
+    }
 }
 
 #[post("/", data = "<paste>")]

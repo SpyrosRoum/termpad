@@ -10,7 +10,8 @@ pub struct Opt {
         short,
         long,
         parse(from_os_str),
-        default_value = "~/.local/share/termpad"
+        default_value = "~/.local/share/termpad",
+        env = "OUTPUT"
     )]
     pub output: PathBuf,
     /// This will be used as to construct the url that is returned to the client.
@@ -21,7 +22,7 @@ pub struct Opt {
     #[structopt(long, env = "HTTPS")]
     pub https: bool,
     /// The port on which the app should run on
-    #[structopt(short, long, default_value = "8000")]
+    #[structopt(short, long, default_value = "8000", env="PORT")]
     pub port: u16,
     /// How many days to keep files for. A value of 0 means forever
     #[structopt(long, default_value = "120", env = "DELETE_AFTER")]

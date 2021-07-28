@@ -46,13 +46,13 @@ $ termpad -d example.com
 ```
 This will return urls like: `http://example.com/BrightAliveMotorcycle`
 
-### Port (`-p` or `--port`)
+### Port (`-p` or `--port`, env = `PORT`)
 Set the port on which the app runs (Default: `8000`)
 ```shell
 $ termpad -p 8043
 ```
 
-### Output (`-o` or `--output`)
+### Output (`-o` or `--output`, env = `OUTPUT`)
 Relative or absolute path to the directory where you want to store user-posted pastes (Default: `~/.local/share/termpad/`)
 ```shell
 $ termpad -o /home/www/pastes/

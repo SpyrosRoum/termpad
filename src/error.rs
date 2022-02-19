@@ -6,6 +6,8 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("Paste not found")]
     NotFound,
+    #[error("{0}")]
+    Http(#[from] axum::http::Error),
 }
 
 impl IntoResponse for Error {

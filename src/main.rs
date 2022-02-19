@@ -12,8 +12,6 @@ use simplelog::{LevelFilter, TermLogger, TerminalMode};
 
 use config::Config;
 
-// const INPUT_PAGE: &str = include_str!("../static/input.html");
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     TermLogger::init(

@@ -16,6 +16,8 @@ use {
 
 use crate::{config::CONFIG, error::Error, templates};
 
+const INPUT_PAGE: &str = include_str!("../static/input.html");
+
 pub async fn get_raw(Path(key): Path<String>) -> Result<impl IntoResponse, Error> {
     let file_path = {
         let mut path = CONFIG.output.join(key.to_ascii_lowercase());
@@ -89,8 +91,8 @@ pub async fn usage(not_found: Option<Query<UsageQuery>>) -> Result<Html<String>,
     }))
 }
 
-pub async fn web_paste() -> impl IntoResponse {
-    todo!()
+pub async fn web_paste() -> Html<&'static str> {
+    Html(INPUT_PAGE)
 }
 
 pub async fn upload() -> impl IntoResponse {

@@ -7,8 +7,13 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use log::{error, info, warn};
-use rand::prelude::*;
+use {
+    axum::http,
+    log::{error, info, warn},
+    rand::prelude::*,
+};
+
+use crate::error;
 
 // List of English adjective words generated based on the data/adjectives.txt file
 pub(crate) const ADJECTIVES: &[&str] = &include!(concat!(env!("OUT_DIR"), "/adjectives.rs"));
@@ -33,21 +38,12 @@ pub(crate) fn gen_name() -> String {
     format!("{}{}{}", adj1, adj2, noun)
 }
 
-pub(crate) fn gen_url(domain: &str, name: &str, https: bool) -> String {
-    let mut url = if https {
-        String::from("https://")
-    } else {
-        String::from("http://")
-    };
-
-    url.push_str(domain);
-    if !domain.ends_with('/') {
-        url.push('/');
-    }
-
-    url.push_str(name);
-
-    url
+pub(crate) fn gen_url(domain: &str, name: &str, https: bool) -> Result<http::Uri, error::Error> {
+    Ok(http::Uri::builder()
+        .scheme(if https { "https" } else { "http" })
+        .authority(domain)
+        .path_and_query(format!("/{}", name))
+        .build()?)
 }
 
 pub(crate) fn expand_tilde<P: AsRef<Path>>(path: P) -> Option<PathBuf> {

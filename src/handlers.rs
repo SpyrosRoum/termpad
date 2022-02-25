@@ -12,7 +12,7 @@ use {
     serde::Deserialize,
     tokio::{
         fs::File,
-        io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
+        io::{AsyncReadExt, AsyncWriteExt, BufReader},
     },
     tokio_util::io::{ReaderStream, StreamReader},
 };
@@ -111,8 +111,7 @@ pub async fn upload(paste: BodyStream) -> Result<String, Error> {
     };
     file_path.set_extension("zst");
 
-    let file = File::create(file_path).await?;
-    let mut writer = BufWriter::new(file);
+    let mut file = File::create(file_path).await?;
 
     let reader = StreamReader::new(
         paste.map(|res| res.map_err(|e| io::Error::new(io::ErrorKind::Other, e))),
@@ -120,24 +119,23 @@ pub async fn upload(paste: BodyStream) -> Result<String, Error> {
     let mut enc = ZstdEncoder::new(reader);
 
     let mut buff = [0; 255];
-    let mut wrote_total = 0;
-    // We read from the encoder and write to the file until there is nothing more to read
     loop {
         let read = enc.read(&mut buff).await?;
-        while wrote_total < read {
-            let wrote = writer.write(&buff).await?;
-            wrote_total += wrote;
-            if wrote == 0 && read != 0 {
-                // For some reason we can't write more bytes to the file
-                return Err(Error::Other("Something went wrong"));
-            }
-        }
-
-        wrote_total = 0;
         if read == 0 {
             break;
         }
+
+        let mut wrote_total = 0;
+        while wrote_total < read {
+            let wrote = file.write(&buff[0..read]).await?;
+            if wrote == 0 {
+                // For some reason we can't write to the file
+                return Err(Error::Other("Failed to write to file"));
+            }
+            wrote_total += wrote;
+        }
     }
 
-    Ok(utils::gen_url(&CONFIG.domain, &name, CONFIG.https).map(|u| u.to_string())?)
+    let url = utils::gen_url(&CONFIG.domain, &name, CONFIG.https).map(|u| u.to_string())?;
+    Ok(url)
 }

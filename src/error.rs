@@ -1,4 +1,7 @@
-use axum::response::IntoResponse;
+use axum::{
+    http::{StatusCode, Uri},
+    response::{IntoResponse, Redirect},
+};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -14,7 +17,14 @@ pub enum Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        // TODO Make `NotFound` redirect to `/usage?not_found=true`
-        todo!()
+        let (status, err_message) = match self {
+            Error::NotFound => {
+                let uri = Uri::from_static("/usage?not_found=true");
+                return Redirect::to(uri).into_response();
+            }
+            _ => (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong"),
+        };
+
+        (status, err_message).into_response()
     }
 }

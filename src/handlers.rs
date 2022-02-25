@@ -125,7 +125,7 @@ pub async fn upload(paste: BodyStream) -> Result<String, Error> {
     loop {
         let read = enc.read(&mut buff).await?;
         while wrote_total < read {
-            let wrote = writer.write(&mut buff).await?;
+            let wrote = writer.write(&buff).await?;
             wrote_total += wrote;
             if wrote == 0 && read != 0 {
                 // For some reason we can't write more bytes to the file

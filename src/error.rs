@@ -8,6 +8,8 @@ pub enum Error {
     NotFound,
     #[error("{0}")]
     Http(#[from] axum::http::Error),
+    #[error("{0}")]
+    Other(&'static str),
 }
 
 impl IntoResponse for Error {

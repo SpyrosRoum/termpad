@@ -1,20 +1,23 @@
+use std::io;
+
 use {
     askama::Template,
-    async_compression::tokio::bufread::ZstdDecoder,
+    async_compression::tokio::bufread::{ZstdDecoder, ZstdEncoder},
     axum::{
         body::StreamBody,
-        extract::{Path, Query},
+        extract::{BodyStream, Path, Query},
         response::{Html, IntoResponse},
     },
+    futures::stream::StreamExt,
     serde::Deserialize,
     tokio::{
         fs::File,
-        io::{AsyncReadExt, BufReader},
+        io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
     },
-    tokio_util::io::ReaderStream,
+    tokio_util::io::{ReaderStream, StreamReader},
 };
 
-use crate::{config::CONFIG, error::Error, templates};
+use crate::{config::CONFIG, error::Error, templates, utils};
 
 const INPUT_PAGE: &str = include_str!("../static/input.html");
 
@@ -95,6 +98,46 @@ pub async fn web_paste() -> Html<&'static str> {
     Html(INPUT_PAGE)
 }
 
-pub async fn upload() -> impl IntoResponse {
-    todo!()
+pub async fn upload(paste: BodyStream) -> Result<String, Error> {
+    let mut file_path = CONFIG.output.clone();
+    let name = loop {
+        let name = utils::gen_name();
+        file_path.push(name.to_lowercase());
+        if !file_path.is_file() {
+            break name;
+        }
+        // Since the file exists we remove the last part so we can get a new one on the next iteration
+        file_path.pop();
+    };
+    file_path.set_extension("zst");
+
+    let file = File::create(file_path).await?;
+    let mut writer = BufWriter::new(file);
+
+    let reader = StreamReader::new(
+        paste.map(|res| res.map_err(|e| io::Error::new(io::ErrorKind::Other, e))),
+    );
+    let mut enc = ZstdEncoder::new(reader);
+
+    let mut buff = [0; 255];
+    let mut wrote_total = 0;
+    // We read from the encoder and write to the file until there is nothing more to read
+    loop {
+        let read = enc.read(&mut buff).await?;
+        while wrote_total < read {
+            let wrote = writer.write(&mut buff).await?;
+            wrote_total += wrote;
+            if wrote == 0 && read != 0 {
+                // For some reason we can't write more bytes to the file
+                return Err(Error::Other("Something went wrong"));
+            }
+        }
+
+        wrote_total = 0;
+        if read == 0 {
+            break;
+        }
+    }
+
+    Ok(utils::gen_url(&CONFIG.domain, &name, CONFIG.https).map(|u| u.to_string())?)
 }
